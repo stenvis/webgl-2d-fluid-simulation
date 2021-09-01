@@ -27,7 +27,7 @@ const particles = {
         uniform vec2 texelSize;
 
         void main() {
-          vec2 v = texture2D(uVelocity, aParticles).xy / 3.;
+          vec2 v = texture2D(uVelocity, aParticles).xy * 0.4;
 
           vec2 uv = aParticles * 2. - 1.;
           uv += v * texelSize;
@@ -69,7 +69,7 @@ const fluid = {
         varying vec2 vB;
 
         void main() {
-          vUv = aPlane / 2. + .5;
+          vUv = aPlane * .5 + .5;
           vL = vUv - vec2(texelSize.x, .0);
           vR = vUv + vec2(texelSize.x, .0);
           vT = vUv + vec2(.0, texelSize.y);
@@ -116,7 +116,7 @@ const fluid = {
 
           vec2 pos = vUv - cursor;
           pos.x *= aspectRatio;
-          v += exp(-dot(pos, pos) / r) * direction;
+          v += exp(-dot(pos, pos) * r) * direction;
 
           gl_FragColor = vec4(v, 1., 1.);
         }
@@ -143,7 +143,7 @@ const fluid = {
           vec2 pos = vUv - cursor;
           pos.x *= aspectRatio;
           vec3 rgb = vec3(color.r, color.g, color.b);
-          dn += exp(-dot(pos, pos) / r) * rgb;
+          dn += exp(-dot(pos, pos) * r) * rgb;
 
           gl_FragColor = vec4(dn, 1.);
         }
@@ -260,8 +260,9 @@ const fluid = {
           float B = texture2D(uCurl, vB).x;
           float C = texture2D(uCurl, vUv).x;
 
+          float rate = .00001;
           vec2 f = vec2(abs(T) - abs(B), abs(R) - abs(L));
-          f *= 1. / length(f + .00001) * curl * C;
+          f *= length(f + rate) * curl * C * rate;
 
           gl_FragColor = vec4(v + f * dt, .0, 1.);
         }
